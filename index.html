@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Loan Application Builder</title>
+</head>
+<body>
+  <h2>Loan Application</h2>
+  <form id="loanForm">
+    <input id="name" placeholder="Customer Name"><br>
+    <input id="email" placeholder="Email"><br>
+    <input id="phone" placeholder="Phone"><br>
+    <select id="loanType">
+      <option>Home</option><option>Personal</option><option>Auto</option>
+    </select><br>
+    <input id="principal" type="number" placeholder="Principal" value="100000"><br>
+    <input id="rate" type="number" placeholder="Interest %" value="7"><br>
+    <input id="tenure" type="number" placeholder="Years" value="5"><br>
+    <input id="doc" placeholder="Add Document">
+    <button type="button" onclick="addDoc()">Add Doc</button>
+    <ul id="docs"></ul>
+    <input id="stage" placeholder="Add Stage">
+    <button type="button" onclick="addStage()">Add Stage</button>
+    <ol id="stages"></ol>
+    <button type="button" onclick="buildApp()">Build</button>
+  </form>
+
+  <pre id="output"></pre>
+
+<script>
+let documents=[], stages=[];
+function addDoc(){ let d=doc.value.trim(); if(d){documents.push(d); doc.value=''; render();} }
+function addStage(){ let s=stage.value.trim(); if(s){stages.push({name:s,done:false}); stage.value=''; render();} }
+function buildApp(){
+  let app={
+    customer:{name:name.value,email:email.value,phone:phone.value},
+    loanType:loanType.value,
+    principal:+principal.value,
+    rate:+rate.value,
+    tenure:+tenure.value,
+    documents,
+    stages
+  };
+  let emi=calcEMI(app.principal,app.rate,app.tenure);
+  output.textContent=JSON.stringify({...app,EMI:emi},null,2);
+}
+function calcEMI(p,r,y){
+  let n=y*12; let m=r/100/12;
+  return p*m*Math.pow(1+m,n)/(Math.pow(1+m,n)-1);
+}
+function render(){
+  docs.innerHTML=documents.map(d=>`<li>${d}</li>`).join('');
+  stagesEl();
+}
+function stagesEl(){
+  stagesEl=document.getElementById('stages');
+  stagesEl.innerHTML=stages.map((s,i)=>`<li>${s.name} - ${s.done?'Done':'Pending'} <button onclick=\"toggle(${i})\">✓</button></li>`).join('');
+}
+function toggle(i){ stages[i].done=!stages[i].done; render(); }
+</script>
+</body>
+</html>
